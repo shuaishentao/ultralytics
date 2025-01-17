@@ -1,4 +1,4 @@
-# Ultralytics YOLO 🚀, AGPL-3.0 license
+# Ultralytics 🚀 AGPL-3.0 License - https://ultralytics.com/license
 """
 Benchmark a YOLO model formats for speed and accuracy.
 
@@ -90,7 +90,7 @@ def benchmark(
 
     y = []
     t0 = time.time()
-    for i, (name, format, suffix, cpu, gpu) in enumerate(zip(*export_formats().values())):
+    for i, (name, format, suffix, cpu, gpu, _) in enumerate(zip(*export_formats().values())):
         emoji, filename = "❌", None  # export defaults
         try:
             # Checks
@@ -114,8 +114,6 @@ def benchmark(
                 assert LINUX or MACOS, "Windows Paddle exports not supported yet"
             if i == 12:  # MNN
                 assert not isinstance(model, YOLOWorld), "YOLOWorldv2 MNN exports not supported yet"
-                assert not IS_RASPBERRYPI, "MNN export not supported on Raspberry Pi"
-                assert not IS_JETSON, "MNN export not supported on NVIDIA Jetson"
             if i == 13:  # NCNN
                 assert not isinstance(model, YOLOWorld), "YOLOWorldv2 NCNN exports not supported yet"
             if i == 14:  # IMX
@@ -442,7 +440,8 @@ class ProfileModels:
         print(f"Profiling: {sorted(files)}")
         return [Path(file) for file in sorted(files)]
 
-    def get_onnx_model_info(self, onnx_file: str):
+    @staticmethod
+    def get_onnx_model_info(onnx_file: str):
         """Extracts metadata from an ONNX model file including parameters, GFLOPs, and input shape."""
         return 0.0, 0.0, 0.0, 0.0  # return (num_layers, num_params, num_gradients, num_flops)
 
@@ -465,7 +464,7 @@ class ProfileModels:
 
         # Model and input
         model = YOLO(engine_file)
-        input_data = np.random.rand(self.imgsz, self.imgsz, 3).astype(np.float32)  # must be FP32
+        input_data = np.zeros((self.imgsz, self.imgsz, 3), dtype=np.uint8)  # use uint8 for Classify
 
         # Warmup runs
         elapsed = 0.0
